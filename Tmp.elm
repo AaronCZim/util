@@ -31,6 +31,7 @@ main =
 type alias Model =
   { w : Float
   , h : Float
+  , tmp : TmpModel
   }
 
 
@@ -40,10 +41,13 @@ defaultH = 128
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( Model defaultW defaultH
-  , Task.attempt
-    getSizeFromViewport
-    Browser.Dom.getViewport
+  ( Model defaultW defaultH tmpInit
+  , Cmd.batch
+    [ Task.attempt
+      getSizeFromViewport
+      Browser.Dom.getViewport
+    , Cmd.map MsgTmp cmdTmpInit
+    ]
   )
 
 
@@ -65,11 +69,23 @@ getSizeFromViewport resultViewport =
 
 type Msg
   = SetSizeFromViewport Float Float
+  | MsgTmp TmpMsg
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    MsgTmp tmpMsg ->
+      let
+        ( tmp, cmd ) =
+          tmpUpdate
+            tmpMsg
+            model.tmp
+      in
+      ( { model | tmp = tmp }
+      , Cmd.map MsgTmp cmd
+      )
+    
     SetSizeFromViewport w h ->
       ( { model
           | w = w
@@ -118,6 +134,9 @@ view model =
       , fill "LightBlue"
       ]
       []
+    , tmpView 0 0 model.w model.h
+      model.tmp
+        |> Svg.map MsgTmp
     ]
 
 
@@ -334,6 +353,10 @@ tmpInit =
 -- Update
 
 
+type TmpMsg
+  = TmpMsg
+
+
 cmdTmpInit =
   Cmd.none
 
@@ -343,6 +366,9 @@ tmpUpdate msg model =
 
 
 -- View
+
+
+black = "rgb(50,50,50)"
 
 
 tmpView left top w h model =
