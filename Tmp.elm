@@ -186,6 +186,22 @@ viewCircle fillC strokeC strokeW cxFloat cyFloat rFloat =
     []
 
 
+viewEllipseFill fillC = viewEllipse fillC "none" 0
+viewEllipseLine strokeC strokeW =
+  viewEllipse "none" strokeC strokeW
+viewEllipse fillC strokeC strokeW cxFloat cyFloat wFloat hFloat =
+  ellipse
+    [ cx <| String.fromFloat cxFloat
+    , cy <| String.fromFloat cyFloat
+    , rx <| String.fromFloat wFloat
+    , ry <| String.fromFloat hFloat
+    , fill fillC
+    , stroke strokeC
+    , strokeWidth <| String.fromFloat strokeW
+    ]
+    []
+
+
 viewText fontC fontSizeFloat xFloat yFloat str =
   text_
     [ x <| String.fromFloat xFloat
